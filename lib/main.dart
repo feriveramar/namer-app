@@ -171,7 +171,7 @@ class GeneratorPage extends StatelessWidget {
 
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center, 
         children: [
           Expanded(
             flex: 3,
