@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'dart:async';
+import 'package:http/http.dart' as http;
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -17,7 +22,7 @@ class MyApp extends StatelessWidget {
         title: 'Namer App',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 204, 243, 189)),
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 116, 224, 101)),
         ),
         home: MyHomePage(),
       ),
@@ -25,11 +30,299 @@ class MyApp extends StatelessWidget {
   }
 }
 
+
+
+
+class RetrainPage extends StatelessWidget {
+  final TextEditingController datasetUrlController = TextEditingController();
+  final TextEditingController shaController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Reentrenar Modelo'),
+        backgroundColor: const Color.fromARGB(255, 34, 200, 25),
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildTextField(datasetUrlController, 'Ingrese URL del dataset'),
+              _buildTextField(shaController, 'Ingrese el SHA'),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  appState.retrainModel(
+                    datasetUrl: datasetUrlController.text,
+                    sha: shaController.text,
+                    githubToken: "token", // Consider removing or securing this token
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  backgroundColor: const Color.fromARGB(255, 25, 162, 7),
+                  textStyle: TextStyle(fontSize: 18),
+                ),
+                child: Text('Reentrenar'),
+              ),
+              SizedBox(height: 20),
+              Consumer<MyAppState>(
+                builder: (context, appState, child) {
+                  return Text(
+                    appState.retrainResult ?? '',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black54),
+                    textAlign: TextAlign.center,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String hint) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          hintText: hint,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide(color: const Color.fromARGB(255, 3, 150, 11)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide(color: const Color.fromARGB(255, 67, 187, 23)),
+          ),
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class ModelPage extends StatelessWidget {
+  final TextEditingController ageController = TextEditingController();
+  final TextEditingController sexController = TextEditingController();
+  final TextEditingController cpController = TextEditingController();
+  final TextEditingController trestbpsController = TextEditingController();
+  final TextEditingController cholController = TextEditingController();
+  final TextEditingController fbsController = TextEditingController();
+  final TextEditingController restecgController = TextEditingController();
+  final TextEditingController thalachController = TextEditingController();
+  final TextEditingController exangController = TextEditingController();
+  final TextEditingController oldpeakController = TextEditingController();
+  final TextEditingController slopeController = TextEditingController();
+  final TextEditingController caController = TextEditingController();
+  final TextEditingController thalController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Model Predictor'),
+        backgroundColor: const Color.fromARGB(255, 168, 254, 181),
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildTextField(ageController, 'Enter age'),
+              _buildTextField(sexController, 'Enter sex'),
+              _buildTextField(cpController, 'Enter cp'),
+              _buildTextField(trestbpsController, 'Enter trestbps'),
+              _buildTextField(cholController, 'Enter chol'),
+              _buildTextField(fbsController, 'Enter fbs'),
+              _buildTextField(restecgController, 'Enter restecg'),
+              _buildTextField(thalachController, 'Enter thalach'),
+              _buildTextField(exangController, 'Enter exang'),
+              _buildTextField(oldpeakController, 'Enter oldpeak'),
+              _buildTextField(slopeController, 'Enter slope'),
+              _buildTextField(caController, 'Enter ca'),
+              _buildTextField(thalController, 'Enter thal'),
+              SizedBox(height: 20), 
+              ElevatedButton(
+                onPressed: () {
+                  appState.callModel(
+                    age: int.parse(ageController.text),
+                    sex: int.parse(sexController.text),
+                    cp: int.parse(cpController.text),
+                    trestbps: int.parse(trestbpsController.text),
+                    chol: int.parse(cholController.text),
+                    fbs: int.parse(fbsController.text),
+                    restecg: int.parse(restecgController.text),
+                    thalach: int.parse(thalachController.text),
+                    exang: int.parse(exangController.text),
+                    oldpeak: double.parse(oldpeakController.text),
+                    slope: int.parse(slopeController.text),
+                    ca: int.parse(caController.text),
+                    thal: int.parse(thalController.text),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  backgroundColor: const Color.fromARGB(255, 4, 150, 101), // Cambiado de primary a backgroundColor
+                  textStyle: TextStyle(fontSize: 18),
+                ),
+                child: Text('Predict'),
+              ),
+              SizedBox(height: 20),
+              Consumer<MyAppState>(
+                builder: (context, appState, child) {
+                  return Text(
+                    appState.predictionResult ?? '',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black54),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String hint) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          hintText: hint,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide(color: const Color.fromARGB(255, 2, 119, 63)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide(color: const Color.fromARGB(255, 72, 243, 33)),
+          ),
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
+      ),
+    );
+  }
+}
+
+
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
   var history = <WordPair>[];
 
   GlobalKey? historyListKey;
+  String? predictionResult;
+  String? retrainResult;
+
+  void retrainModel({
+    required String datasetUrl,
+    required String sha,
+    required String githubToken,
+  }) async {
+    final url = Uri.parse("https://api.github.com/repos/feriveramar/heart-model/dispatches");
+    final headers = {
+      'Authorization': 'Bearer $githubToken',
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-type': 'application/json',
+    };
+    final body = jsonEncode({
+      'event_type': 'ml_ci_cd',
+      'client_payload': {
+        'dataseturl': datasetUrl,
+        'sha': sha,
+      },
+    });
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 204) {
+        retrainResult = 'Reentrenamiento del modelo desencadenado exitosamente.';
+      } else {
+        retrainResult = 'Error al desencadenar el reentrenamiento del modelo: ${response.body}';
+      }
+    } catch (e) {
+      retrainResult = 'Exception: $e';
+    }
+    notifyListeners();
+  }
+
+  void callModel({
+    required int age,
+    required int sex,
+    required int cp,
+    required int trestbps,
+    required int chol,
+    required int fbs,
+    required int restecg,
+    required int thalach,
+    required int exang,
+    required double oldpeak,
+    required int slope,
+    required int ca,
+    required int thal,
+  }) async {
+    final url = Uri.parse("https://fastapiml-latest-reaw.onrender.com/score");
+    final headers = {"Content-Type": "application/json;charset=UTF-8"};
+    final predictionInstance = {
+      "age": age,
+      "sex": sex,
+      "cp": cp,
+      "trestbps": trestbps,
+      "chol": chol,
+      "fbs": fbs,
+      "restecg": restecg,
+      "thalach": thalach,
+      "exang": exang,
+      "oldpeak": oldpeak,
+      "slope": slope,
+      "ca": ca,
+      "thal": thal,
+    };
+
+    try {
+      final res = await http.post(url, headers: headers, body: jsonEncode(predictionInstance));
+      if (res.statusCode == 200) {
+        final jsonPrediction = res.body;
+        print(jsonPrediction);
+        predictionResult = res.body;
+      } else {
+        print('Error: ${res.statusCode}');
+        predictionResult = 'Error: ${res.statusCode}';
+      }
+    } catch (e) {
+      print('Exception: $e');
+      predictionResult = 'Exception: $e';
+    }
+    notifyListeners();
+  }
 
   void getNext() {
     history.insert(0, current);
@@ -77,6 +370,12 @@ class _MyHomePageState extends State<MyHomePage> {
       case 1:
         page = FavoritesPage();
         break;
+      case 2:
+        page = ModelPage();
+        break;
+      case 3:
+        page = RetrainPage ();
+        break;
       default:
         throw UnimplementedError('no widget for $selectedIndex');
     }
@@ -111,6 +410,14 @@ class _MyHomePageState extends State<MyHomePage> {
                         icon: Icon(Icons.favorite),
                         label: 'Favorites',
                       ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.heart_broken),
+                        label: 'Model',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.add_box),
+                        label: 'Retrain',
+                      ),
                     ],
                     currentIndex: selectedIndex,
                     onTap: (value) {
@@ -136,6 +443,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       NavigationRailDestination(
                         icon: Icon(Icons.favorite),
                         label: Text('Favorites'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.heart_broken),
+                        label: Text('Model'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.add_box),
+                        label: Text('Retrain'),
                       ),
                     ],
                     selectedIndex: selectedIndex,
